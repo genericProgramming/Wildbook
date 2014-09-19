@@ -127,34 +127,16 @@ public class EncounterSetMaximumDepth extends HttpServlet {
       else {
         out.println(ServletUtilities.getHeader(request));
         out.println("<strong>Failure:</strong> Encounter depth was NOT updated because another user is currently modifying the record for this encounter or the value input does not translate to a valid depth number.");
-        out.println("<p><a href=\"http://" + CommonConfiguration.getURLLocation(request) + "/encounters/encounter.jsp?number=" + request.getParameter("number") + "\">Return to encounter #" + request.getParameter("number") + "</a></p>\n");
-        ArrayList<String> allStates=CommonConfiguration.getSequentialPropertyValues("encounterState",context);
-        int allStatesSize=allStates.size();
-        if(allStatesSize>0){
-          for(int i=0;i<allStatesSize;i++){
-            String stateName=allStates.get(i);
-            out.println("<p><a href=\"encounters/searchResults.jsp?state="+stateName+"\">View all "+stateName+" encounters</a></font></p>");   
-          }
-        }
-        out.println("<p><a href=\"individualSearchResults.jsp\">View all individuals</a></font></p>");
+        // <!--AJAX removing these not longer needed links
+        out.println("<p>"); // hack to make the div draw correctly
         out.println(ServletUtilities.getFooter(context));
-
-
       }
     }
     else {
       out.println(ServletUtilities.getHeader(request));
       out.println("<strong>Error:</strong> I don't have enough information to complete your request.");
-      out.println("<p><a href=\"http://" + CommonConfiguration.getURLLocation(request) + "/encounters/encounter.jsp?number=" + request.getParameter("number") + "\">Return to encounter #" + request.getParameter("number") + "</a></p>\n");
-      ArrayList<String> allStates=CommonConfiguration.getSequentialPropertyValues("encounterState",context);
-      int allStatesSize=allStates.size();
-      if(allStatesSize>0){
-        for(int i=0;i<allStatesSize;i++){
-          String stateName=allStates.get(i);
-          out.println("<p><a href=\"encounters/searchResults.jsp?state="+stateName+"\">View all "+stateName+" encounters</a></font></p>");   
-        }
-      }
-      out.println("<p><a href=\"individualSearchResults.jsp\">View all individuals</a></font></p>");
+      // <!--AJAX removing these not longer needed links
+      out.println("<p>"); // hack to make the div draw correctly
       out.println(ServletUtilities.getFooter(context));
 
     }

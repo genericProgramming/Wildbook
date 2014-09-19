@@ -1236,12 +1236,12 @@ $("a#VBDate").click(function() {
         		return formattedDate;
         	}
         	else{
-        	    return "Uknown";   
+        	    return "<%=encprops.getProperty("unknown") %>";   
         	}
         }
         </script>
         <input name="AddDate" type="button" id="AddDate" value="<%=encprops.getProperty("setDate")%>"
-            onclick="ajaxSubmit(function() {return getDateString(); },function(a){ $('#date_link_content').html(a)} , $(document.forms.setxencshark), 'dialogDate' )" />
+            onclick="ajaxSubmit(getDateString ,function(a){ $('#date_link_content').html(a)} , $(document.forms.setxencshark), 'dialogDate' )" />
         </form>
       </td>
     </tr>
@@ -1284,91 +1284,95 @@ $("a#date").click(function() {
 <br />
 <p>
 	<img src="../images/2globe_128.gif" width="40px" height="40px" align="absmiddle"/> <strong><%=encprops.getProperty("location") %> </strong>
-</p>	 
-<%
-if(enc.getLocation()!=null){
-%>
-<em><%=encprops.getProperty("locationDescription")%> <%=enc.getLocation()%></em>
-<%
-}
-%>
-
-  <%
-    if (isOwner && CommonConfiguration.isCatalogEditable(context)) {
-  %><a id="location" class="launchPopup"><img align="absmiddle" width="20px" height="20px" style="border-style: none;" src="../images/Crystal_Clear_action_edit.png" /></a>
-  <%
-    }
-  %>
-<br /><em><%=encprops.getProperty("locationID") %></em>: <%=enc.getLocationCode()%>
-  <%
-    if (isOwner && CommonConfiguration.isCatalogEditable(context)) {%>
-  <font size="-1"><a id="locationID" class="launchPopup"><img align="absmiddle" width="20px" height="20px" style="border-style: none;" src="../images/Crystal_Clear_action_edit.png" /></a></font>
-  <a href="<%=CommonConfiguration.getWikiLocation(context)%>locationID" target="_blank"><img
-    src="../images/information_icon_svg.gif" alt="Help" border="0" align="absmiddle"></a> <%
-    }
-  %>
-
-<br />
-
- <em><%=encprops.getProperty("country") %></em>: 
-  <%
-  if(enc.getCountry()!=null){
-  %>
-  <%=enc.getCountry()%>
-  <%
-  }
-    if (isOwner && CommonConfiguration.isCatalogEditable(context)) {%>
-  <font size="-1"><a id="country" class="launchPopup"><img align="absmiddle" width="20px" height="20px" style="border-style: none;" src="../images/Crystal_Clear_action_edit.png" /></a></font>
-  <a href="<%=CommonConfiguration.getWikiLocation(context)%>country" target="_blank"><img
-    src="../images/information_icon_svg.gif" alt="Help" border="0" align="absmiddle"></a> <%
-    }
-  %>
-  
-  
-  <!-- Display maximumDepthInMeters so long as show_maximumDepthInMeters is not false in commonCOnfiguration.properties-->
-    <%
-		if(CommonConfiguration.showProperty("maximumDepthInMeters",context)){
-		%>
-<br />
-<em><%=encprops.getProperty("depth") %>
-
-  <%
-    if (enc.getDepthAsDouble() !=null) {
-  %> 
-  <%=enc.getDepth()%> <%=encprops.getProperty("meters")%> <%
-  } else {
-  %> <%=encprops.getProperty("unknown") %>
-  <%
-    }
- 
-if (isOwner && CommonConfiguration.isCatalogEditable(context)) {
-  %>
-&nbsp;<a id="depth" class="launchPopup"><img align="absmiddle" width="20px" height="20px" style="border-style: none;" src="../images/Crystal_Clear_action_edit.png" /></a>
-<%
-}
-%>
+</p>
+<!--AJAX 
+    adding id to allow us to update when the new value is set 
+    As far as I can tell, enc.getLocation is never null?    
+-->
+<em>
+<%if(enc.getLocation()!=null){%>
+    <%=encprops.getProperty("locationDescription")%> <span id="location_description_html" > <%=enc.getLocation()%> </span>
+<%}%>
 </em>
-<%
-  }
-%>
-<!-- End Display maximumDepthInMeters -->
 
-<%
-if (isOwner && CommonConfiguration.isCatalogEditable(context)) {
-%>
+  <%if (isOwner && CommonConfiguration.isCatalogEditable(context)) {%>
+    <a id="location" class="launchPopup"><img align="absmiddle" width="20px" height="20px" style="border-style: none;" src="../images/Crystal_Clear_action_edit.png" /></a>
+  <%}%>
+    <br/>
+    <!--AJAX adding id to allow us to update when the new value is set -->
+    <em><%=encprops.getProperty("locationID") %></em>: <span id="location_id_html"> <%=enc.getLocationCode()%> </span>
+  <% if (isOwner && CommonConfiguration.isCatalogEditable(context)) {%>
+		<font size="-1">
+		    <a id="locationID" class="launchPopup">
+		        <img align="absmiddle" width="20px" height="20px" style="border-style: none;"
+		            src="../images/Crystal_Clear_action_edit.png" />
+		    </a>
+		</font>
+		<a href="<%=CommonConfiguration.getWikiLocation(context)%>locationID"
+		    target="_blank">
+		    <img src="../images/information_icon_svg.gif" alt="Help" border="0"
+		        align="absmiddle">
+		</a>   
+	<%}%>
+    <br />
+    <!--AJAX adding id to allow us to update when the new value is set -->
+    <em><%=encprops.getProperty("country") %></em>: <span id="country_html">
+      <%if(enc.getCountry()!=null){%>
+            <%=enc.getCountry()%>
+        <%}%>
+    </span>
+    <%if (isOwner && CommonConfiguration.isCatalogEditable(context)) {%>
+		  <font size="-1"><a id="country" class="launchPopup"><img align="absmiddle" width="20px" height="20px" style="border-style: none;" src="../images/Crystal_Clear_action_edit.png" /></a></font>
+		  <a href="<%=CommonConfiguration.getWikiLocation(context)%>country" target="_blank"><img
+		    src="../images/information_icon_svg.gif" alt="Help" border="0" align="absmiddle"></a> 
+    <%}%>
+  <!-- Display maximumDepthInMeters so long as show_maximumDepthInMeters is not false in commonCOnfiguration.properties-->
+    <%if(CommonConfiguration.showProperty("maximumDepthInMeters",context)){%>
+        <br/>
+        <em><%=encprops.getProperty("depth") %>
+            <!--AJAX adding id to allow us to update when the new value is set -->
+            <span id="max_depth_html">
+        <%if (enc.getDepthAsDouble() !=null) {%> 
+            <%=enc.getDepth()%> 
+            <%=encprops.getProperty("meters")%> 
+        <%} else {%>
+            <%=encprops.getProperty("unknown") %>
+        <%}%>
+        </span>
+       <%if (isOwner && CommonConfiguration.isCatalogEditable(context)) {%>
+                &nbsp;<a id="depth" class="launchPopup"><img align="absmiddle" width="20px" height="20px" style="border-style: none;" src="../images/Crystal_Clear_action_edit.png" /></a>
+        <%}%>
+        </em>
+<%}%>
+<!-- End Display maximumDepthInMeters -->
+<%if (isOwner && CommonConfiguration.isCatalogEditable(context)) {%>
 <!-- start depth popup -->  
 <div id="dialogDepth" title="<%=encprops.getProperty("setDepth")%>" style="display:none">  
-
 	<table border="1" cellpadding="1" cellspacing="0" bordercolor="#FFFFFF">
-
     <tr>
       <td align="left" valign="top">
-        <form name="setencdepth" action="../EncounterSetMaximumDepth" method="post">
-          <input name="depth" type="text" id="depth" size="10" /> <%=encprops.getProperty("meters")%>
+      <!--AJAX Updating the form -->
+        <form name="setencdepth" action="../EncounterSetMaximumDepth" method="post" onsumbmit="return false;">
+          <input name="depth" type="text" id="depth_input" size="10" /> <%=encprops.getProperty("meters")%>
           <input name="lengthUnits" type="hidden" id="lengthUnits" value="Meters" /> 
           <input name="number" type="hidden" value="<%=num%>" id="number" />
           <input name="action" type="hidden" value="setEncounterDepth" /> 
-          <input name="AddDepth" type="submit" id="AddDepth" value="<%=encprops.getProperty("setDepth")%>" />
+          <script type="text/javascript">
+          function getDepthMeters(){
+        	  var meters = ' <%=encprops.getProperty("meters")%>';
+        	  var unknown = '<%=encprops.getProperty("unknown") %>';
+        	  var m = $('#depth_input').val();
+        	  // first check for an empty value
+        	  if (m.trim().length == 0){
+        		  return unknown;
+        	  }
+        	  // now check for a garbage value
+        	  return Number.isNaN( Number(m) ) ? unknown : Number(m).toFixed(1) + meters;  
+          }
+          </script>
+          <input name="AddDepth" type="button" id="AddDepth" value="<%=encprops.getProperty("setDepth")%>"
+            onclick="ajaxSubmit( getDepthMeters ,function(a){ $('#max_depth_html').html(a)} , $(document.forms.setencdepth), 'dialogDepth' )"
+          />
         </form>
       </td>
     </tr>
@@ -1388,9 +1392,7 @@ $("a#depth").click(function() {
 });
 </script>   
 <!-- end depth popup --> 
-<%
-}
-%>
+<%}%>
 
 
 <!-- Display maximumElevationInMeters so long as show_maximumElevationInMeters is not false in commonCOnfiguration.properties-->
@@ -1606,20 +1608,17 @@ $("a#elev").click(function() {
 					<td>
 					<form name="resetGPSform" method="post" action="../EncounterSetGPS">
 				    	<input name="action" type="hidden" value="resetGPS" />
-    				
 						<strong><%=encprops.getProperty("latitude")%>:</strong>
-		
 						<input name="lat" type="text" id="lat" size="10" value="<%=laty%>" /> &deg;
 						<strong><%=encprops.getProperty("longitude")%>:</strong>
 						<input name="longitude" type="text" id="longitude" size="10" value="<%=longy%>" />&nbsp;&deg;
 						<br />
-						<input name="setGPSbutton" type="submit" id="setGPSbutton" value="<%=encprops.getProperty("setGPS")%>" />
-    				
+						<input name="setGPSbutton" type="button" id="setGPSbutton" value="<%=encprops.getProperty("setGPS")%>"
+						onclick="ajaxSubmit( function(){} ,function(a){ } , $(document.forms.resetGPSform) )" />
 						<br/>
 						<br/>
 						<%=encprops.getProperty("gpsConverter")%> <a href="http://www.csgnetwork.com/gpscoordconv.html" target="_blank">Click here to find a converter.</a>
 						<input name="number" type="hidden" value=<%=num%> /> 
-				    				
 					</form>
 				</td>
 			</tr>
@@ -1637,54 +1636,34 @@ if (isOwner && CommonConfiguration.isCatalogEditable(context)) {
 %>
 <!-- start locationID popup-->  
 <div id="dialogLocationID" title="<%=encprops.getProperty("setLocationID")%>" style="display:none">  
-
   <table width="150" border="1" cellpadding="1" cellspacing="0" bordercolor="#FFFFFF">
     <tr>
       <td align="left" valign="top">
-        <form name="addLocCode" action="../EncounterSetLocationID" method="post">
-              
-              <%
-              if(CommonConfiguration.getProperty("locationID0",context)==null){
-              %>
+      <!--AJAX Updating the form -->
+        <form name="addLocCode" action="../EncounterSetLocationID" method="post" onsubmit="return false;">
+              <% if(CommonConfiguration.getProperty("locationID0",context)==null){ %>
               <input name="code" type="text" size="10" maxlength="50" /> 
-              <%
-              }
-              else{
-            	  //iterate and find the locationID options
-            	  %>
+              <%}else{ //iterate and find the locationID options%>
             	  <select name="code" id="code">
-						            	<option value=""></option>
-						       
-						       <%
-						       boolean hasMoreLocs=true;
-						       int taxNum=0;
-						       while(hasMoreLocs){
-						       	  String currentLoc = "locationID"+taxNum;
-						       	  if(CommonConfiguration.getProperty(currentLoc,context)!=null){
-						       	  	%>
-						       	  	 
-						       	  	  <option value="<%=CommonConfiguration.getProperty(currentLoc,context)%>"><%=CommonConfiguration.getProperty(currentLoc,context)%></option>
-						       	  	<%
-						       		taxNum++;
-						          }
-						          else{
-						             hasMoreLocs=false;
-						          }
-						          
+					<option value="" ></option>
+					<%
+					 boolean hasMoreLocs=true;
+				       int taxNum=0;
+				       while(hasMoreLocs){
+				       	  String currentLoc = "locationID"+taxNum;
+				       	  if(CommonConfiguration.getProperty(currentLoc,context)!=null){%>
+		                  <option value="<%=CommonConfiguration.getProperty(currentLoc,context)%>"><%=CommonConfiguration.getProperty(currentLoc,context)%></option>
+						  <%taxNum++;}
+				          else{
+				        	   hasMoreLocs=false;
 						       }
-						       %>
-						       
-						       
-						      </select>  
-            	  
-            	  
-            <% 	  
-              }
-              %>
-              
-                                   <input name="number" type="hidden" value="<%=num%>" /> 
-                                   <input name="action" type="hidden" value="addLocCode" />
-          							<input name="Set Location ID" type="submit" id="Add" value="<%=encprops.getProperty("setLocationID")%>" />
+					  }%>
+                </select>    
+            <%}%>  
+            <input name="number" type="hidden" value="<%=num%>" /> 
+            <input name="action" type="hidden" value="addLocCode" />
+            <input name="Set Location ID" type="button" id="Add" value="<%=encprops.getProperty("setLocationID")%>" 
+                onclick="ajaxSubmit(function(){return $(document.forms.addLocCode).find('#code option:selected').val(); } ,function(a){ $('#location_id_html').html(a)} , $(document.forms.addLocCode), 'dialogLocationID' )" />
           </form>
       </td>
     </tr>
@@ -1719,10 +1698,11 @@ $("a#locationID").click(function() {
         	thisLocation=enc.getLocation().trim();
         }
         %>
-        <textarea name="location" size="15"><%=thisLocation%></textarea>
+        <textarea name="location" id="location_text_area" size="15"><%=thisLocation%></textarea>
           <input name="number" type="hidden" value="<%=num%>" /> 
           <input name="action" type="hidden" value="setLocation" /> 
-          <input name="Add" type="submit" id="Add" value="<%=encprops.getProperty("setLocation")%>" />
+          <input name="Add" type="button" id="Add" value="<%=encprops.getProperty("setLocation")%>" 
+          onclick="ajaxSubmit(function(){return $('#location_text_area').val(); } ,function(a){ $('#location_description_html').html(a)} , $(document.forms.setLocation), 'dialogLocation' )" />
         </form>
       </td>
     </tr>
@@ -1777,11 +1757,10 @@ $("a#location").click(function() {
 						          
 						       }
 						       %>
-						       
-						       
 						      </select> 
 						      <input name="encounter" type="hidden" value="<%=num%>" id="number" />
-						        <input name="<%=encprops.getProperty("set")%>" type="submit" id="<%=encprops.getProperty("set")%>" value="<%=encprops.getProperty("set")%>" />
+						        <input name="<%=encprops.getProperty("set")%>" type="button" id="<%=encprops.getProperty("set")%>" value="<%=encprops.getProperty("set")%>" 
+						        onclick="ajaxSubmit(function(){return $(document.forms.countryForm).find('#country option:selected').val(); } ,function(a){ $('#country_html').html(a)} , $(document.forms.countryForm), 'dialogCountry' )" />
 						      </form>
 						    </td>
 						  </tr>
