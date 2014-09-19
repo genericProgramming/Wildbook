@@ -434,10 +434,18 @@ margin-bottom: 8px !important;
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
   })();
 </script>
+<!--AJAX Adding this include to get the ajaxSubmit function used in this file -->
+<script type="text/javascript" src="../javascript/ajaxSubmit.js" ></script>
 </head>
 
 <body <%if (request.getParameter("noscript") == null) {%>
   onload="initialize()" <%}%>>
+
+<!--AJAX 
+    This is the dialog div we will use to display any issues that may occur 
+    It doesn't really matter where we put this div so I'm placing it here for now    
+-->
+<div id="ajax_response_dialog" title="Update Error" style="display:none"></div>
 
 	<div id="wrapper">
 		<div id="page">
@@ -588,7 +596,11 @@ margin-bottom: 8px !important;
     							if (enc.isAssignedToMarkedIndividual().equals("Unassigned")) {
   								%>
     							<p class="para">
-    								 <%=encprops.getProperty("identified_as") %> <%=enc.isAssignedToMarkedIndividual()%> 
+    								 <%=encprops.getProperty("identified_as") %> 
+    								 <!-- AJAX adding this so that we can set the correctly updated value on update -->
+                                     <span id="itentity_html_value" >
+    								 <%=enc.isAssignedToMarkedIndividual()%>
+    								 </span> 
       								<%
         							if (isOwner && CommonConfiguration.isCatalogEditable(context)) {
      								%>
@@ -686,9 +698,11 @@ margin-bottom: 8px !important;
           												<input name="noemail" type="checkbox" value="noemail" />
           												<%=encprops.getProperty("suppressEmail")%><br /> 
           												<input name="number" type="hidden" value="<%=num%>" /> 
-          												<input name="action" type="hidden" value="add" />
-          												<input name="Add" type="submit" id="Add" value="<%=encprops.getProperty("add")%>" />
-        										</form>
+          												<input name="action" type="hidden" value="add" /> 
+          												<input name="Add" type="button" id="Add"
+													       value="<%=encprops.getProperty("add")%>"
+													       onclick="ajaxSubmit(function() {return $('#individual_add2').val() },function(a){ $('#itentity_html_value').html(a)} , $(document.forms.add2shark), 'dialogIdentity' )" />
+											</form>
      										 </td>
     									</tr>
   									</table>
@@ -753,7 +767,8 @@ margin-bottom: 8px !important;
 													<input name="noemail" type="checkbox" value="noemail" />
         											<%=encprops.getProperty("suppressEmail")%><br /> 
         
-      												<input name="Create" type="submit" id="Create" value="<%=encprops.getProperty("create")%>" />
+      											   <input name="Create" type="button" id="Create" value="<%=encprops.getProperty("create")%>" 
+                                                    onclick="ajaxSubmit(function() {return $('#individual').val() },function(a){ $('#itentity_html_value').html(a)} , $(document.forms.createShark), 'dialogIdentity' )"/>
       											</form>
     										</td>
   										</tr>
@@ -991,7 +1006,8 @@ $("a#occurrence").click(function() {
 
 <p><img align="absmiddle" src="../images/calendar.png" width="40px" height="40px" /> <strong><%=encprops.getProperty("date") %>
 </strong><br/><br/>
-  <a
+  <!--AJAX adding this so that we can set the correctly updated value on update --> 
+  <a id="date_link_content"
     href="http://<%=CommonConfiguration.getURLLocation(request)%>/xcalendar/calendar.jsp?scDate=<%=enc.getMonth()%>/1/<%=enc.getYear()%>">
     <%=enc.getDate()%>
   </a>
@@ -1004,22 +1020,17 @@ $("a#occurrence").click(function() {
 
 <br />
 <em><%=encprops.getProperty("verbatimEventDate")%></em>:
-    <%
-				if(enc.getVerbatimEventDate()!=null){
-				%>
-    <%=enc.getVerbatimEventDate()%>
-    <%
-				}
-				else {
-				%>
-    <%=encprops.getProperty("none") %>
-    <%
-				}
-				if(isOwner&&CommonConfiguration.isCatalogEditable(context)) {
- 					%> <font size="-1"><a id="VBDate" class="launchPopup"><img align="absmiddle" width="20px" height="20px" style="border-style: none;" src="../images/Crystal_Clear_action_edit.png" /></a></font> <%
-        		}
-        		%>
-      		
+     <!-- AJAX adding this span id so that we can set the correctly updated value on update --> 
+     <span id="verbatim_event_date">
+    <%if(enc.getVerbatimEventDate()!=null){	%>
+        <%=enc.getVerbatimEventDate()%>
+    <%}	else {%>
+        <%=encprops.getProperty("none") %>
+    <%}%>
+    </span>
+	<%if(isOwner&&CommonConfiguration.isCatalogEditable(context)) {
+ 	  %> <font size="-1"><a id="VBDate" class="launchPopup"><img align="absmiddle" width="20px" height="20px" style="border-style: none;" src="../images/Crystal_Clear_action_edit.png" /></a></font> <%
+      }%>	
   
 <!-- end verbatim event date -->  
         		
@@ -1030,7 +1041,9 @@ $("a#occurrence").click(function() {
 %>
 <c:if test="${showReleaseDate}">
   <br /><em><%=encprops.getProperty("releaseDate") %></em>:
+    <span id="release_date_html">
     <fmt:formatDate value="${enc.releaseDate}" pattern="dd/MM/yyyy"/>
+    </span>
     <c:if test="${editable}">
         <font size="-1"><a id="releaseDate" class="launchPopup"><img align="absmiddle" width="20px" height="20px" style="border-style: none;" src="../images/Crystal_Clear_action_edit.png" /></a></font>
     </c:if>
@@ -1044,15 +1057,24 @@ $("a#occurrence").click(function() {
 
     <tr>
         <td>
-            <form name="setReleaseDate" method="post" action="../EncounterSetReleaseDate">
+            <!--AJAX editing the form to stop submission on enter, as well as adding the new ajax function -->
+            <form name="setReleaseDate" method="post" action="../EncounterSetReleaseDate" onsubmit="return false;">
                 <input type="hidden" name="encounter" value="${num}"/>
             <table>
-                <tr><td><%=encprops.getProperty("releaseDateFormat") %></td></tr>
+                <tr>
+                <td><%=encprops.getProperty("releaseDateFormat") %></td>
+                </tr>
                 <c:set var="releaseDate">
                     <fmt:formatDate value="${enc.releaseDate}" pattern="dd/MM/yyyy"/>
                 </c:set>
-                <tr><td><input name="releaseDate" value="${releaseDate}"/></td></tr>
-                <tr><td><input name="${set}" type="submit" value="${set}"/></td></tr>
+                <tr>
+                    <td><input name="releaseDate" id="release_date_field" value="${releaseDate}"/></td>
+                </tr>
+                <tr>
+                    <td>
+                <input name="${set}" type="button" id="AddDate" value="${set}" 
+                onclick="ajaxSubmit(function() {return $('#release_date_field').val() },function(a){ $('#release_date_html').html(a)} , $(document.forms.setReleaseDate), 'dialogReleaseDate' )"/>
+                </td></tr>
             </table>
             </form>
         </td>
@@ -1075,7 +1097,6 @@ $("a#releaseDate").click(function() {
 <!-- end releaseDate --> 
 <!-- start verbatim event date popup -->  
 <div id="dialogVBDate" title="<%=encprops.getProperty("setVerbatimEventDate")%>" style="display:none">  
-
 	  <table border="1" cellpadding="1" cellspacing="0" bordercolor="#FFFFFF">
 		    <tr>
 		      <td align="left" valign="top" class="para"><strong><font
@@ -1087,10 +1108,15 @@ $("a#releaseDate").click(function() {
 		    </tr>
 		    <tr>
 		      <td align="left" valign="top">
+		      <!--AJAX editing the form to stop submission on enter, as well as adding the new ajax function -->
 		        <form name="setVerbatimEventDate" action="../EncounterSetVerbatimEventDate"
-		              method="post"><input name="verbatimEventDate" type="text" size="10" maxlength="50"> 
+		              method="post" onsubmit="return false;">
+		              <input name="verbatimEventDate" id="verbatim_event_date_input" type="text" size="10" maxlength="50">  
 		              <input name="encounter" type="hidden" value=<%=num%>>
-		          <input name="Set" type="submit" id="<%=encprops.getProperty("set")%>" value="<%=encprops.getProperty("set")%>"></form>
+		              <input name="Set" type="button" id="<%=encprops.getProperty("set")%>" value="<%=encprops.getProperty("set")%>"
+                            onclick="ajaxSubmit(function() {return $('#verbatim_event_date_input').val() },
+                            function(a){ $('#verbatim_event_date').html(a.length == 0 ? '<%=encprops.getProperty("none") %>' : a)} , $(document.forms.setVerbatimEventDate), 'dialogVBDate' )"/>  
+                </form>
 		      </td>
 		    </tr>
 		  </table>
@@ -1115,43 +1141,33 @@ $("a#VBDate").click(function() {
 
     <tr>
       <td align="left" valign="top">
-        <form name="setxencshark" action="../EncounterResetDate" method="post">
-          <em><%=encprops.getProperty("day")%>
-          </em> <select name="day" id="day">
-          <option value="0">?</option>
-          <%
-            for (int pday = 1; pday < 32; pday++) {
-          %>
-          <option value="<%=pday%>"><%=pday%>
-          </option>
-          <%
-            }
-          %>
-        </select><br /> <em>&nbsp;<%=encprops.getProperty("month")%>
-        </em> <select name="month" id="month">
+        <form name="setxencshark" action="../EncounterResetDate" method="post" onsubmit="return false;">
+          <em><%=encprops.getProperty("day")%></em> 
+          <select name="day" id="day">
+            <option value="0">?</option>
+            <%for (int pday = 1; pday < 32; pday++) {%>
+                <option value="<%=pday%>"><%=pday%></option>
+            <%}%>
+          </select>
+          <br /> 
+          <em>&nbsp;<%=encprops.getProperty("month")%></em> 
+        <select name="month" id="month">
           <option value="-1">?</option>
-          <%
-            for (int pmonth = 1; pmonth < 13; pmonth++) {
-          %>
-          <option value="<%=pmonth%>"><%=pmonth%>
-          </option>
-          <%
-            }
-          %>
-        </select><br /> <em>&nbsp;<%=encprops.getProperty("year")%>
-        </em> <select name="year" id="year">
+          <% for (int pmonth = 1; pmonth < 13; pmonth++) { %>
+            <option value="<%=pmonth%>"><%=pmonth%></option>
+          <% } %>
+        </select>
+        <br /> 
+        <em>&nbsp;<%=encprops.getProperty("year")%></em> 
+        <select name="year" id="year">
           <option value="-1">?</option>
-
-          <%
-            for (int pyear = nowYear; pyear > (nowYear - 50); pyear--) {
-          %>
-          <option value="<%=pyear%>"><%=pyear%>
-          </option>
-          <%
-            }
-          %>
-        </select><br /> <em>&nbsp;<%=encprops.getProperty("hour")%>
-        </em> <select name="hour" id="hour">
+          <% for (int pyear = nowYear; pyear > (nowYear - 50); pyear--) { %>
+            <option value="<%=pyear%>"><%=pyear%></option>
+          <%}%>
+        </select>
+        <br /> 
+        <em>&nbsp;<%=encprops.getProperty("hour")%></em> 
+        <select name="hour" id="hour">
           <option value="-1" selected>?</option>
           <option value="6">6 am</option>
           <option value="7">7 am</option>
@@ -1168,16 +1184,64 @@ $("a#VBDate").click(function() {
           <option value="18">6 pm</option>
           <option value="19">7 pm</option>
           <option value="20">8 pm</option>
-        </select><br /> <em>&nbsp;<%=encprops.getProperty("minutes")%>
-        </em> <select name="minutes" id="minutes">
+        </select>
+        <br /> 
+        <em>&nbsp;<%=encprops.getProperty("minutes")%></em> 
+        <select name="minutes" id="minutes">
           <option value="00" selected>:00</option>
           <option value="15">:15</option>
           <option value="30">:30</option>
           <option value="45">:45</option>
-        </select><br /> 
+        </select>
+        <br/> 
         <input name="number" type="hidden" value="<%=num%>" id="number" /> 
-        <input name="action" type="hidden" value="changeEncounterDate" /> 
-        <input name="AddDate" type="submit" id="AddDate" value="<%=encprops.getProperty("setDate")%>" />
+        <input name="action" type="hidden" value="changeEncounterDate" />
+        <!--AJAX adding this function to build the date client side --> 
+        <script type="text/javascript">
+        function getOptionValue(optionId){
+            return $(document.forms.setxencshark).find("#"+optionId+" option:selected").val();        	
+        }
+        
+        function getDateString(){
+        	var validValues = [];
+        	// this is roughly a foreach loop
+        	["minutes", "hour", "day", "month", "year"].map(function(a){
+        		// get the selected option
+        	    var optValue = getOptionValue(a);
+        		// skip the empty values 
+        		if (["-1", "0"].indexOf(optValue) > -1 ){
+        			validValues = [];
+        		}
+        		else {
+        			validValues.push(optValue);
+        		}
+        	});
+        	if (validValues.length > 0){
+        		var formattedDate = "";
+        		validValues.reverse().map(function(value, i){
+        			if (i != formattedDate.length -1 ){
+	        			if (i < 3 && i > 0){
+	        				formattedDate += "-";
+	        			}
+	        			else if (i == 3){
+	        				formattedDate += " ";
+	        			}
+	        			else if (i == 4){
+	        				formattedDate += ":";
+	        			}
+        			}
+                    formattedDate += value;
+        			// no other possible option
+        		});
+        		return formattedDate;
+        	}
+        	else{
+        	    return "Uknown";   
+        	}
+        }
+        </script>
+        <input name="AddDate" type="button" id="AddDate" value="<%=encprops.getProperty("setDate")%>"
+            onclick="ajaxSubmit(function() {return getDateString(); },function(a){ $('#date_link_content').html(a)} , $(document.forms.setxencshark), 'dialogDate' )" />
         </form>
       </td>
     </tr>

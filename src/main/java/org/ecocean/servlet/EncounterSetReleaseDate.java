@@ -64,7 +64,9 @@ public class EncounterSetReleaseDate extends HttpServlet {
         myShepherd.rollbackDBTransaction();
         out.println(sb.toString());
         out.println("No changes were made.");
-        out.println("<p><a href=\"http://"+CommonConfiguration.getURLLocation(request)+"/encounters/encounter.jsp?number="+encNum+"\">Return to encounter "+encNum+"</a></p>\n");
+        // <!--AJAX disabling the link so that users dont reload the page
+        //out.println("<p><a href=\"http://"+CommonConfiguration.getURLLocation(request)+"/encounters/encounter.jsp?number="+encNum+"\">Return to encounter "+encNum+"</a></p>\n");
+        out.println("<p>");        // fixes weird issue with missing element tag
         out.println(ServletUtilities.getFooter(context));
       }
       else if (!locked) {
@@ -79,18 +81,17 @@ public class EncounterSetReleaseDate extends HttpServlet {
       else {
         out.println(ServletUtilities.getHeader(request));
         out.println("<strong>Failure!</strong> This encounter is currently being modified by another user, or an exception occurred. Please wait a few seconds before trying to modify this encounter again.");
-
-        out.println("<p><a href=\"http://"+CommonConfiguration.getURLLocation(request)+"/encounters/encounter.jsp?number="+encNum+"\">Return to encounter "+encNum+"</a></p>\n");
+        // <!--AJAX disabling the link so that users dont reload the page
+        //out.println("<p><a href=\"http://"+CommonConfiguration.getURLLocation(request)+"/encounters/encounter.jsp?number="+encNum+"\">Return to encounter "+encNum+"</a></p>\n");
+        out.println("<p>");        // fixes weird issue with missing element tag
         out.println(ServletUtilities.getFooter(context));
       }
-      
     }
     else {
       myShepherd.rollbackDBTransaction();
       out.println(ServletUtilities.getHeader(request));
       out.println("<strong>Error:</strong> I was unable to set the tag. I cannot find the encounter that you intended in the database.");
       out.println(ServletUtilities.getFooter(context));
-
     }
     out.close();
     myShepherd.closeDBTransaction();
