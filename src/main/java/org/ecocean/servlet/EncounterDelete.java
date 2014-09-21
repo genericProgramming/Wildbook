@@ -74,7 +74,6 @@ public class EncounterDelete extends HttpServlet {
     
     boolean isOwner = true;
 
-
     if (request.getParameter("number") != null) {
       String message = "Encounter " + request.getParameter("number") + " was deleted from the database.";
       ServletUtilities.informInterestedParties(request, request.getParameter("number"), message,context);
