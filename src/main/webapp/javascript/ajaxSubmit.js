@@ -2,8 +2,8 @@
     <!--AJAX 
     This is the generic function we're going to use to replace the old form submissions.
     It's a pseudo lazy way to perform these updates, only in the way that it handles errors.
-    for now we're just going to search for the text <strong>Error:</strong>, and if we see 
-    it display it in the ajax_response_dialog to indicate to the user that something crapped out
+    for now we're just going to search for the text <strong>Success:</strong>, and if we dont see 
+    it, display the responses in the ajax_response_dialog to indicate to the user that something crapped out
     on us. Otherwise, everything can work as normal. I tried to mark any edits with an 
     AJAX html comment, but I may have missed a few.
     
@@ -38,7 +38,7 @@ function ajaxSubmit(new_value_function, old_value_function, form_jquery_object, 
     		$("#"+old_dialog_box_id).dialog("close");
     	}
         // check for an error 
-        if (html_response.match(/[^>]*?(Error|Failure)[^>]*?/gi)){
+        if (!html_response.match(/[^>]*?(Success)[^>]*?/gi)){
         	// we have a problem! display the response html and finish
         	var ajax_d= $("#ajax_response_dialog");
         	ajax_d.dialog({

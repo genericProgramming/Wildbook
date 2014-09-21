@@ -2742,31 +2742,20 @@ $("a#comments").click(function() {
 <p><img align="absmiddle" width="40px" height="40px" style="border-style: none;" src="../images/workflow_icon.gif" /> <strong><%=encprops.getProperty("metadata") %></strong></p>
 								
 								<!-- START WORKFLOW ATTRIBUTE -->
- 								<%
-        						
-									String state="";
-									if (enc.getState()!=null){state=enc.getState();}
-									%>
+ 								<%String state="";
+									if (enc.getState()!=null){state=enc.getState();}%>
 									<p class="para">
-										 <%=encprops.getProperty("workflowState") %> <%=state %> 
-										
-										<%
-										if (isOwner && CommonConfiguration.isCatalogEditable(context)) {
-										%>
+										 <%=encprops.getProperty("workflowState") %> <span id="workflow_state_attribute" ><%=state %></span> 
+										<%if (isOwner && CommonConfiguration.isCatalogEditable(context)) {%>
 										<a id="state" class="launchPopup"><img align="absmiddle" width="20px" height="20px" style="border-style: none;" src="../images/Crystal_Clear_action_edit.png" /></a>
-										<%
-										}
-										%>
-									
+										<% } %>
 									</p>
-									<%
-										if (isOwner && CommonConfiguration.isCatalogEditable(context)) {
-									%>
+									<% if (isOwner && CommonConfiguration.isCatalogEditable(context)) { %>
    									<div id="dialogState" title="<%=encprops.getProperty("setWorkflowState")%>" style="display:none">  
   										<table class="popupForm">
 						  					<tr>
 						    					<td align="left" valign="top">
-						      						<form name="countryForm" action="../EncounterSetState" method="post">
+						      						<form name="stateForm" action="../EncounterSetState" method="post" action="return false;">
 						            					<select name="state" id="state">
 															<%
 						       								boolean hasMoreStates=true;
@@ -2787,7 +2776,9 @@ $("a#comments").click(function() {
 						       								%>
 						      						</select> 
 						      						<input name="number" type="hidden" value="<%=num%>" id="number" />
-						        					<input name="<%=encprops.getProperty("set")%>" type="submit" id="<%=encprops.getProperty("set")%>" value="<%=encprops.getProperty("set")%>" />
+						        					<input name="<%=encprops.getProperty("set")%>" type="button" id="<%=encprops.getProperty("set")%>" value="<%=encprops.getProperty("set")%>" 
+                                                        onclick="ajaxSubmit(function() {return $(document.forms.stateForm).find('#state').val() },function(a){ $('#workflow_state_attribute').html(a)} , $(document.forms.stateForm), 'dialogState' )" 						        					
+						        					/>
 						      					</form>
 						    				</td>
 						  				</tr>
@@ -2953,42 +2944,39 @@ $("a#username").click(function() {
 
 
 <!-- start set username popup -->  
-<div id="dialogUser" title="<%=encprops.getProperty("assignUser")%>" style="display:none">  
-
-	    <table border="1" cellpadding="1" cellspacing="0" bordercolor="#FFFFFF">
-    <tr>
-      <td align="left" valign="top" class="para"><font
-        color="#990000"><img align="absmiddle"
-                             src="../images/Crystal_Clear_app_Login_Manager.gif"/>
-        <strong><%=encprops.getProperty("assignUser")%>:</strong></font></td>
-    </tr>
-    <tr>
-      <td align="left" valign="top">
-        <form name="asetSubmID" action="../EncounterSetSubmitterID" method="post">
-          
-          <select name="submitter" id="submitter">
-        	<option value=""></option>
-        	<%
-        	ArrayList<String> usernames=myShepherd.getAllUsernames();
-        	int numUsers=usernames.size();
-        	for(int i=0;i<numUsers;i++){
-        		String thisUsername=usernames.get(i);
-        		User thisUser2=myShepherd.getUser(thisUsername);
-        		String thisUserFullname=thisUsername;
-        		if(thisUser2.getFullName()!=null){thisUserFullname=thisUser2.getFullName();}
-        	%>
-        	<option value="<%=thisUsername%>"><%=thisUserFullname%></option>
-        	<%
-			}
-        	%>
-      	</select> 
-              
-          <input name="number" type="hidden" value="<%=num%>" /> 
-          <input name="Assign" type="submit" id="Assign" value="<%=encprops.getProperty("assign")%>" />
-        </form>
-      </td>
-    </tr>
-  </table>
+<div id="dialogUser" title="<%=encprops.getProperty("assignUser")%>" style="display:none">
+	<table border="1" cellpadding="1" cellspacing="0" bordercolor="#FFFFFF">
+		<tr>
+			<td align="left" valign="top" class="para"><font
+				color="#990000"><img align="absmiddle"
+					src="../images/Crystal_Clear_app_Login_Manager.gif" />
+					<strong><%=encprops.getProperty("assignUser")%>:</strong></font></td>
+		</tr>
+		<tr>
+			<td align="left" valign="top">
+				<form name="asetSubmID" action="../EncounterSetSubmitterID" method="post">
+					<select name="submitter" id="submitter">
+						<option value=""></option>
+						<%
+							for (String thisUsername : myShepherd.getAllUsernames()) {
+								User thisUser2 = myShepherd
+										.getUser(thisUsername);
+								String thisUserFullname = thisUsername;
+								if (thisUser2.getFullName() != null) {
+									thisUserFullname = thisUser2.getFullName();
+								}
+						%>
+						<option value="<%=thisUsername%>"><%=thisUserFullname%></option>
+						<% } %>
+					</select> 
+					<input name="number" type="hidden" value="<%=num%>" />
+					<input name="Assign" type="button" id="Assign" value="<%=encprops.getProperty("assign")%>" 
+					onClick="ajaxSubmit(function(){},function(){ location.reload() }, $(document.forms.asetSubmID) ,'dialogUser' );"
+					/>
+				</form>
+			</td>
+		</tr>
+	</table>
 </div>
                          		<!-- popup dialog script -->
 <script>
@@ -3031,14 +3019,34 @@ if (isOwner) {
 <table width="100%" border="0" cellpadding="1">
     <tr>
       <td height="30" class="para">   
-        <form name="setTapirLink" method="post" action="../EncounterSetTapirLinkExposure">
-              <input name="action" type="hidden" id="action" value="tapirLinkExpose" /> 
-              <input name="number" type="hidden" value="<%=num%>" /> 
-              <% 
-              String tapirCheckIcon="cancel.gif";
-              if(enc.getOKExposeViaTapirLink()){tapirCheckIcon="check_green.png";}
-              %>
-              TapirLink:&nbsp;<input align="absmiddle" name="approve" type="image" src="../images/<%=tapirCheckIcon %>" id="approve" value="<%=encprops.getProperty("change")%>" />&nbsp;<a href="<%=CommonConfiguration.getWikiLocation(context)%>tapirlink" target="_blank"><img src="../images/information_icon_svg.gif" alt="Help" border="0" align="absmiddle"/></a>
+        <form name="setTapirLink" method="post" action="../EncounterSetTapirLinkExposure" onsubmit="return false;">
+				<input name="action" type="hidden" id="action" value="tapirLinkExpose" /> 
+				<input name="number" type="hidden" value="<%=num%>" /> 
+				TapirLink:&nbsp;
+				<input align="absmiddle" name="approve" type="image" src="../images/cancel.gif" id="taprilink_cancel" value="<%=encprops.getProperty("change")%>" onclick="imageSubmit()"/>
+				<input style="display:none" align="absmiddle" name="approve" type="image" src="../images/check_green.png" id="taprilink_check_green" value="<%=encprops.getProperty("change")%>" onclick="imageSubmit()" />
+				&nbsp;<a href="<%=CommonConfiguration.getWikiLocation(context)%>tapirlink" target="_blank"><img src="../images/information_icon_svg.gif" alt="Help" border="0" align="absmiddle"/></a>
+                  <script type="text/javascript">
+                      function toggleDisplay(){
+                    	  if ($("#taprilink_check_green").is(':visible')){
+                    		  $("#taprilink_check_green").hide();
+                    		  $("#taprilink_cancel").show();
+                    	  }
+                    	  else {
+                    		  $("#taprilink_check_green").show();
+                              $("#taprilink_cancel").hide();
+                    	  }
+                      }
+                      
+                      function imageSubmit(){
+                    	  toggleDisplay();
+                    	  ajaxSubmit(function(){},function(){}, $(document.forms.setTapirLink) );
+                      }
+                      
+                      <% if(enc.getOKExposeViaTapirLink()){ %>
+                      toggleDisplay();
+                      <% } %>
+                  </script>
         </form>
       </td>
     </tr>
@@ -3055,16 +3063,33 @@ if (isOwner) {
 <table width="100%" border="0" cellpadding="1">
     <tr>
       <td height="30" class="para">   
-        <form onsubmit="return confirm('<%=encprops.getProperty("sureDelete") %>');" name="deleteEncounter" method="post" action="../EncounterDelete">
+        <form onsubmit="return false;" name="deleteEncounter" method="post" action="../EncounterDelete">
               <input name="number" type="hidden" value="<%=num%>" /> 
-              <% 
-              String deleteIcon="cancel.gif";
-              %>
-              <img src="../images/Warning_icon_small.png" align="absmiddle" />&nbsp;<%=encprops.getProperty("deleteEncounter") %> <input align="absmiddle" name="approve" type="image" src="../images/<%=deleteIcon %>" id="deleteButton" />
+              <% String deleteIcon="cancel.gif"; %>
+              <img src="../images/Warning_icon_small.png" align="absmiddle" />&nbsp;<%=encprops.getProperty("deleteEncounter") %> 
+              <input align="absmiddle" name="approve" type="image" src="../images/<%=deleteIcon %>" id="deleteButton" />
         </form>
       </td>
     </tr>
   </table>
+<div id="confirmDeleteDiaglog" >
+    <script type="text/javascript">
+    	$("#deleteButton").click(function() {
+    		dlgDelete = $("#confirmDeleteDiaglog"); 
+    		$("#confirmDeleteDiaglog").dialog({
+    	          autoOpen: false,
+    	          draggable: false,
+    	          resizable: false,
+    	          width: 600,
+    	          buttons:{
+    	        	  OK: function() { ajaxSubmit(function(){}, function(){window.location="searchResults.jsp?state=unapproved"}, $(document.forms.deleteEncounter), 'confirmDeleteDiaglog' )},
+    	        	  Cancel:function () {dlgDelete.dialog("close");}
+    	          }
+    	        }).html('<%=encprops.getProperty("sureDelete") %>');
+    	  dlgDelete.dialog("open");
+    	});
+    </script>
+</div>
 <!-- END DELETE ENCOUNTER FORM --> 
 <%
 }
@@ -3074,58 +3099,10 @@ if (isOwner) {
 <p class="para"><%=encprops.getProperty("auto_comments")%> <a id="autocomments" class="launchPopup"><img height="40px" width="40px" align="middle" src="../images/Crystal_Clear_app_kaddressbook.gif" /></a></p>
 
 <!-- start autocomments popup -->  
-<div id="dialogAutoComments" title="<%=encprops.getProperty("auto_comments")%>" style="display:none">  
-<table>
-  <tr>
-    <td valign="top">
-      
-      <%
-      String rComments="";
-      if(enc.getRComments()!=null){rComments=enc.getRComments();}
-      %>
-      
-      <div style="text-align:left;border:1px solid black;width:575px;height:400px;overflow-y:scroll;overflow-x:scroll;">
-      
-      		<p class="para"><%=rComments.replaceAll("\n", "<br />")%></p>
-      </div>
-      
-      <%
-      if(isOwner && CommonConfiguration.isCatalogEditable(context)){
-      %>
-      <form action="../EncounterAddComment" method="post" name="addComments">
-        <p class="para">
-          <input name="user" type="hidden" value="<%=request.getRemoteUser()%>" id="user" />
-          <input name="number" type="hidden" value="<%=enc.getEncounterNumber()%>" id="number" />
-          <input name="action" type="hidden" value="enc_comments" id="action" />
-		</p>
-        <p>
-          <textarea name="autocomments" cols="50" id="autocomments"></textarea> <br/>
-          <input name="Submit" type="submit" value="<%=encprops.getProperty("add_comment")%>" />
-        </p>
-      </form>
-      <%
-      }
-      %>
-      
-      
-      
-    </td>
-  </tr>
-</table>
-</div>
-
-<script>
-var dlgAutoComments = $("#dialogAutoComments").dialog({
-  autoOpen: false,
-  draggable: false,
-  resizable: false,
-  width: 600
-});
-
-$("a#autocomments").click(function() {
-  dlgAutoComments.dialog("open");
-});
-</script>   
+<jsp:include page="auditComments.jsp" >
+    <jsp:param name="number" value="<%=request.getParameter("number")%>" />   
+</jsp:include>
+  
 <!-- END AUTOCOMMENTS --> 
   
 <%
