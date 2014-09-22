@@ -1217,7 +1217,7 @@ $("a#elev").click(function() {
 						<input name="longitude" type="text" id="longitude" size="10" value="<%=longy%>" />&nbsp;&deg;
 						<br />
 						<input name="setGPSbutton" type="button" id="setGPSbutton" value="<%=encprops.getProperty("setGPS")%>"
-						onclick="ajaxSubmit( function(){} ,function(a){ } , $(document.forms.resetGPSform) )" />
+						onclick="ajaxSubmit( function(){} ,function(a){ alert('GPS Lat/Long Updated') } , $(document.forms.resetGPSform) )" />
 						<br/>
 						<br/>
 						<%=encprops.getProperty("gpsConverter")%> <a href="http://www.csgnetwork.com/gpscoordconv.html" target="_blank">Click here to find a converter.</a>
@@ -3230,7 +3230,6 @@ $("a#dynamicPropertyAdd").click(function() {
   <td style="vertical-align: top">
     <jsp:include page="encounterImagesEmbed.jsp" flush="true">
     	<jsp:param name="encounterNumber" value="<%=num%>" />
-    	<jsp:param name="isOwner" value="<%=isOwner %>" />
     	<jsp:param name="loggedIn" value="<%=loggedIn %>" />
   	</jsp:include>
   </td>
@@ -4676,6 +4675,7 @@ else {
 int currentImportNum=0;
 while(encprops.getProperty(("jspImport"+currentImportNum))!=null){
 	  String importName=encprops.getProperty(("jspImport"+currentImportNum));
+	  System.out.println(importName);
 	//let's set up references to our file system components
 	  
 %>

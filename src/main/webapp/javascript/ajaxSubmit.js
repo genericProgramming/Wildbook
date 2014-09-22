@@ -31,34 +31,16 @@ function ajaxSubmit(new_value_function, old_value_function, form_jquery_object, 
      */
     function handleServerResponse(html_response){
     	 // debug 
-    	 console.log(html_response);
-    	 console.log("#"+old_dialog_box_id)
-    	 
+    	console.log(html_response);
+    	     	 
     	// close the old dialog box if it's requested
-    	 dialog_box = $("#"+old_dialog_box_id) 
+    	dialog_box = $("#"+old_dialog_box_id) 
     	if (typeof old_dialog_box_id !== "undefined" && dialog_box.hasClass('ui-dialog-content')){
     		dialog_box.dialog("close");
 
     	}
         // check for an error 
-        if (!html_response.match(/[^>]*?(Success)[^>]*?/gi)){
-        	// we have a problem! display the response html and finish
-        	var ajax_d= $("#ajax_response_dialog");
-        	ajax_d.dialog({
-        		autoOpen: false,
-                draggable: true,
-                resizable: false,
-                width:'auto',
-                height:'auto',
-                close:function(){
-                    // remove all added dialog stuff
-                	$(this).dialog("close") ;
-                	$(this).dialog("destroy") ;
-                }
-        	}).html(html_response);
-        	ajax_d.dialog("open");
-        }
-        else {
+    	if (checkResponseHTMLForError(html_response)){
         	// get the new value and set it on the old value
         	old_value_function(new_value_function());
         }
@@ -103,4 +85,30 @@ function reloadEntireDiv(jsp_file_name, form_object, div_name, dialog_name){
 			}
 		}, 'html');
 	}, form_object, dialog_name);
+}
+
+/**
+ * Check response html for an error and display error if present
+ * True == error occurred
+ */
+function checkResponseHTMLForError(html_response){
+	if (!html_response.match(/[^>]*?(Success)[^>]*?/gi)){
+    	// we have a problem! display the response html and finish
+    	var ajax_d= $("#ajax_response_dialog");
+    	ajax_d.dialog({
+    		autoOpen: false,
+            draggable: true,
+            resizable: false,
+            width:'auto',
+            height:'auto',
+            close:function(){
+                // remove all added dialog stuff
+            	$(this).dialog("close") ;
+            	$(this).dialog("destroy") ;
+            }
+    	}).html(html_response);
+    	ajax_d.dialog("open");
+    	return true;
+    }
+	return false;
 }
