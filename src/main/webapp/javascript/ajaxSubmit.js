@@ -32,10 +32,13 @@ function ajaxSubmit(new_value_function, old_value_function, form_jquery_object, 
     function handleServerResponse(html_response){
     	 // debug 
     	 console.log(html_response);
+    	 console.log("#"+old_dialog_box_id)
     	 
     	// close the old dialog box if it's requested
-    	if (typeof old_dialog_box_id !== "undefined"){
-    		$("#"+old_dialog_box_id).dialog("close");
+    	 dialog_box = $("#"+old_dialog_box_id) 
+    	if (typeof old_dialog_box_id !== "undefined" && dialog_box.hasClass('ui-dialog-content')){
+    		dialog_box.dialog("close");
+
     	}
         // check for an error 
         if (!html_response.match(/[^>]*?(Success)[^>]*?/gi)){
@@ -48,8 +51,9 @@ function ajaxSubmit(new_value_function, old_value_function, form_jquery_object, 
                 width:'auto',
                 height:'auto',
                 close:function(){
-                    // remove all added dialog stuff 
-                	$(this).dialog("destroy") 
+                    // remove all added dialog stuff
+                	$(this).dialog("close") ;
+                	$(this).dialog("destroy") ;
                 }
         	}).html(html_response);
         	ajax_d.dialog("open");
@@ -75,4 +79,28 @@ function ajaxSubmit(new_value_function, old_value_function, form_jquery_object, 
         console.log(error);
         alert("Something is broken on the server :-(. Sorry home-skillet");
     });
-}	   
+}
+
+/**
+ * This function submits the input form and then reloads a div with the input jsp file
+ */
+function reloadEntireDiv(jsp_file_name, form_object, div_name, dialog_name){
+	var valid_dialog = typeof dialog_name !== "undefined";
+	// call the reload function to submit the comments
+	  ajaxSubmit(function() {}, function() {
+		// reload this div with the data submitted
+		$.get(jsp_file_name, form_object.serialize(), function(data) {
+			$('#'+div_name).replaceWith(data);
+			// rebuild the dialog
+			if (valid_dialog){
+				$(dialog_name).dialog({
+		             autoOpen: false,
+		             draggable: false,
+		             resizable: false,
+		             width: 600,
+		             close: function(){ $(this).dialog("close"); $(this).dialog("destroy")  }
+				});
+			}
+		}, 'html');
+	}, form_object, dialog_name);
+}
