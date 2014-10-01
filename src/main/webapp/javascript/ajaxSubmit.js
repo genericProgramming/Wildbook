@@ -31,17 +31,16 @@ function ajaxSubmit(new_value_function, old_value_function, form_jquery_object, 
      */
     function handleServerResponse(html_response){
     	 // debug 
-    	console.log(html_response);
-    	     	 
+    	console.log(html_response);     	 
     	// close the old dialog box if it's requested
     	dialog_box = $("#"+old_dialog_box_id) 
     	if (typeof old_dialog_box_id !== "undefined" && dialog_box.hasClass('ui-dialog-content')){
     		dialog_box.dialog("close");
-
     	}
         // check for an error 
-    	if (checkResponseHTMLForError(html_response)){
+    	if (!checkResponseHTMLForError(html_response)){
         	// get the new value and set it on the old value
+    		console.log(new_value_function())
         	old_value_function(new_value_function());
         }
     }
