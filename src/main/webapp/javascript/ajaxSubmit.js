@@ -2,8 +2,8 @@
     <!--AJAX 
     This is the generic function we're going to use to replace the old form submissions.
     It's a pseudo lazy way to perform these updates, only in the way that it handles errors.
-    for now we're just going to search for the text <strong>Error:</strong>, and if we see 
-    it display it in the ajax_response_dialog to indicate to the user that something crapped out
+    for now we're just going to search for the text <strong>Success:</strong>, and if we dont see 
+    it, display the responses in the ajax_response_dialog to indicate to the user that something crapped out
     on us. Otherwise, everything can work as normal. I tried to mark any edits with an 
     AJAX html comment, but I may have missed a few.
     
@@ -31,31 +31,16 @@ function ajaxSubmit(new_value_function, old_value_function, form_jquery_object, 
      */
     function handleServerResponse(html_response){
     	 // debug 
-    	 console.log(html_response);
-    	 
+    	console.log(html_response);     	 
     	// close the old dialog box if it's requested
-    	if (typeof old_dialog_box_id !== "undefined"){
-    		$("#"+old_dialog_box_id).dialog("close");
+    	dialog_box = $("#"+old_dialog_box_id) 
+    	if (typeof old_dialog_box_id !== "undefined" && dialog_box.hasClass('ui-dialog-content')){
+    		dialog_box.dialog("close");
     	}
         // check for an error 
-        if (html_response.match(/[^>]*?(Error|Failure)[^>]*?/gi)){
-        	// we have a problem! display the response html and finish
-        	var ajax_d= $("#ajax_response_dialog");
-        	ajax_d.dialog({
-        		autoOpen: false,
-                draggable: true,
-                resizable: false,
-                width:'auto',
-                height:'auto',
-                close:function(){
-                    // remove all added dialog stuff 
-                	$(this).dialog("destroy") 
-                }
-        	}).html(html_response);
-        	ajax_d.dialog("open");
-        }
-        else {
+    	if (!checkResponseHTMLForError(html_response)){
         	// get the new value and set it on the old value
+    		console.log(new_value_function())
         	old_value_function(new_value_function());
         }
     }
@@ -75,4 +60,54 @@ function ajaxSubmit(new_value_function, old_value_function, form_jquery_object, 
         console.log(error);
         alert("Something is broken on the server :-(. Sorry home-skillet");
     });
-}	   
+}
+
+/**
+ * This function submits the input form and then reloads a div with the input jsp file
+ */
+function reloadEntireDiv(jsp_file_name, form_object, div_name, dialog_name){
+	var valid_dialog = typeof dialog_name !== "undefined";
+	// call the reload function to submit the comments
+	  ajaxSubmit(function() {}, function() {
+		// reload this div with the data submitted
+		$.get(jsp_file_name, form_object.serialize(), function(data) {
+			$('#'+div_name).replaceWith(data);
+			// rebuild the dialog
+			if (valid_dialog){
+				$(dialog_name).dialog({
+		             autoOpen: false,
+		             draggable: false,
+		             resizable: false,
+		             width: 600,
+		             close: function(){ $(this).dialog("close"); $(this).dialog("destroy")  }
+				});
+			}
+		}, 'html');
+	}, form_object, dialog_name);
+}
+
+/**
+ * Check response html for an error and display error if present
+ * True == error occurred
+ */
+function checkResponseHTMLForError(html_response){
+	if (!html_response.match(/[^>]*?(Success)[^>]*?/gi)){
+    	// we have a problem! display the response html and finish
+    	var ajax_d= $("#ajax_response_dialog");
+    	ajax_d.dialog({
+    		autoOpen: false,
+            draggable: true,
+            resizable: false,
+            width:'auto',
+            height:'auto',
+            close:function(){
+                // remove all added dialog stuff
+            	$(this).dialog("close") ;
+            	$(this).dialog("destroy") ;
+            }
+    	}).html(html_response);
+    	ajax_d.dialog("open");
+    	return true;
+    }
+	return false;
+}

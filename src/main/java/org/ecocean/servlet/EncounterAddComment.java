@@ -62,29 +62,6 @@ public class EncounterAddComment extends HttpServlet {
 
     boolean isOwner = true;
 
-    /**
-     if(request.getParameter("number")!=null){
-     myShepherd.beginDBTransaction();
-     if(myShepherd.isEncounter(request.getParameter("number"))) {
-     Encounter verifyMyOwner=myShepherd.getEncounter(request.getParameter("number"));
-     String locCode=verifyMyOwner.getLocationCode();
-
-     //check if the encounter is assigned
-     if((verifyMyOwner.getSubmitterID()!=null)&&(request.getRemoteUser()!=null)&&(verifyMyOwner.getSubmitterID().equals(request.getRemoteUser()))){
-     isOwner=true;
-     }
-
-     //if the encounter is assigned to this user, they have permissions for it...or if they're a manager
-     else if((request.isUserInRole("admin"))){
-     isOwner=true;
-     }
-     //if they have general location code permissions for the encounter's location code
-     else if(request.isUserInRole(locCode)){isOwner=true;}
-     }
-     myShepherd.rollbackDBTransaction();
-     }*/
-
-
     myShepherd.beginDBTransaction();
     if ((request.getParameter("number") != null) && (request.getParameter("user") != null) && (request.getParameter("autocomments") != null) && (myShepherd.isEncounter(request.getParameter("number")))) {
 
@@ -109,7 +86,7 @@ public class EncounterAddComment extends HttpServlet {
         ServletUtilities.informInterestedParties(request, request.getParameter("number"), message,context);
       } else {
         out.println("<strong>Failure:</strong> I did NOT add your comments. Another user is currently modifying the entry for this encounter. Please try to add your comments again in a few seconds.");
-        out.println("<p><a href=\"http://" + CommonConfiguration.getURLLocation(request) + "/encounters/encounter.jsp?number=" + request.getParameter("number") + "\">Return to encounter #" + request.getParameter("number") + "</a></p>\n");
+        // removing the unnecessary links
       }
       out.println(ServletUtilities.getFooter(context));
 
@@ -117,7 +94,7 @@ public class EncounterAddComment extends HttpServlet {
     } else {
       out.println(ServletUtilities.getHeader(request));
       out.println("<strong>Error:</strong> I don't have enough information to add your comments.");
-      out.println("<p><a href=\"http://" + CommonConfiguration.getURLLocation(request) + "/encounters/encounter.jsp?number=" + request.getParameter("number") + "\">Return to encounter #" + request.getParameter("number") + "</a></p>\n");
+      // removing the unnecessary links
       out.println(ServletUtilities.getFooter(context));
     }
     myShepherd.closeDBTransaction();
